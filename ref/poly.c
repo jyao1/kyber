@@ -6,6 +6,10 @@
 #include "cbd.h"
 #include "symmetric.h"
 
+#include <stdio.h>
+void print_poly(char *name, poly *p);
+void print_hex(char *name, uint8_t *buffer, size_t len);
+
 /*************************************************
 * Name:        poly_compress
 *

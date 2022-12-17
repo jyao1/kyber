@@ -18,6 +18,17 @@
 #endif
 #endif
 
+#if 0
+
+void randombytes(uint8_t *out, size_t outlen) {
+  size_t i;
+  for (i = 0; i < outlen; i++) {
+    out[i] = 0;
+  }
+}
+
+#else
+
 #ifdef _WIN32
 void randombytes(uint8_t *out, size_t outlen) {
   HCRYPTPROV ctx;
@@ -77,4 +88,6 @@ void randombytes(uint8_t *out, size_t outlen) {
     outlen -= ret;
   }
 }
+#endif
+
 #endif

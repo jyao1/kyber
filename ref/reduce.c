@@ -2,6 +2,8 @@
 #include "params.h"
 #include "reduce.h"
 
+#include <stdio.h>
+
 /*************************************************
 * Name:        montgomery_reduce
 *

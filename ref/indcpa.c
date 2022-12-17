@@ -8,6 +8,13 @@
 #include "symmetric.h"
 #include "randombytes.h"
 
+#include "stdio.h"
+void print_matrix(char *name, polyvec pv[KYBER_K]);
+void print_polyvec(char *name, polyvec *pv);
+void print_poly(char *name, poly *p);
+void print_hex(char *name, uint8_t *buffer, size_t len);
+void print_xof_state (char *name, xof_state *state);
+
 /*************************************************
 * Name:        pack_pk
 *
@@ -175,7 +182,12 @@ void gen_matrix(polyvec *a, const uint8_t seed[KYBER_SYMBYTES], int transposed)
       else
         xof_absorb(&state, seed, j, i);
 
+      //print_xof_state ("xof_absorb - state", &state);
+
       xof_squeezeblocks(buf, GEN_MATRIX_NBLOCKS, &state);
+      //print_xof_state ("xof_squeezeblocks - state", &state);
+      //print_hex ("xof_squeezeblocks - buf", buf, GEN_MATRIX_NBLOCKS*XOF_BLOCKBYTES);
+
       buflen = GEN_MATRIX_NBLOCKS*XOF_BLOCKBYTES;
       ctr = rej_uniform(a[i].vec[j].coeffs, KYBER_N, buf, buflen);
 
@@ -214,22 +226,31 @@ void indcpa_keypair(uint8_t pk[KYBER_INDCPA_PUBLICKEYBYTES],
 
   randombytes(buf, KYBER_SYMBYTES);
   hash_g(buf, buf, KYBER_SYMBYTES);
+  //print_hex ("publicseed", buf, KYBER_SYMBYTES);
+  //print_hex ("noiseseed", buf+KYBER_SYMBYTES, KYBER_SYMBYTES);
 
   gen_a(a, publicseed);
+  //print_matrix ("a", a);
 
   for(i=0;i<KYBER_K;i++)
     poly_getnoise_eta1(&skpv.vec[i], noiseseed, nonce++);
+  //print_polyvec ("skpv-eta1", &skpv);
+
   for(i=0;i<KYBER_K;i++)
     poly_getnoise_eta1(&e.vec[i], noiseseed, nonce++);
+  //print_polyvec ("e-eta1", &e);
 
   polyvec_ntt(&skpv);
+  //print_polyvec ("skpv-ntt", &skpv);
   polyvec_ntt(&e);
+  //print_polyvec ("e-ntt", &e);
 
   // matrix-vector multiplication
   for(i=0;i<KYBER_K;i++) {
     polyvec_basemul_acc_montgomery(&pkpv.vec[i], &a[i], &skpv);
     poly_tomont(&pkpv.vec[i]);
   }
+  //print_polyvec ("pkpv", &pkpv);
 
   polyvec_add(&pkpv, &pkpv, &e);
   polyvec_reduce(&pkpv);
